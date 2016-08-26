@@ -1,18 +1,13 @@
 #!/usr/bin/python
 import sys
 
-def printChangelog( pkg, n=-1, v=False ):
+def printChangelog( pkg, nlines=-1, v=False ):
 	from lxml import html
 	from urllib2 import urlopen,HTTPError
 
-	url = 'https://git.archlinux.org/svntogit/packages.git/log/trunk?h=packages/' + pkg
-	
-	desc = []
-	hop=2
-	
-	if v:
-		url = url + "&showmsg=1"
-		hop=3
+	url = 'https://git.archlinux.org/svntogit/packages.git/log/trunk?h=packages/' + pkg + "&showmsg=1"
+	desc = []	
+	hop=3
 	
 	try:
 		ref = urlopen(url)
@@ -41,10 +36,10 @@ def printChangelog( pkg, n=-1, v=False ):
 		desc = ['\n'.join(x) for x in desc]
 		desc = [' ' + (d.encode('ascii','ignore')).replace('\n','\n ') for d in desc]
 
-	if n > 0:
-		dates = dates[0:n]
-		changes = changes[0:n]
-		desc = desc[0:n]
+	if nlines > 0:
+		dates = dates[0:nlines]
+		changes = changes[0:nlines]
+		desc = desc[0:nlines]
 
 	dates = ['\033[1m' + d + '\033[0m' for d in dates]
 
@@ -65,7 +60,7 @@ def printChangelog( pkg, n=-1, v=False ):
 				print(fstre.format(d,c))
 
 def main(argv):
-	n=-1
+	nlines=-1
 	pkg=None
 	v=False
 	
@@ -84,9 +79,9 @@ def main(argv):
 		sys.exit()
 	for s in argv:
 		try:
-			n=int(s)
+			nlines=int(s)
 		except ValueError:
-			if s == '-h':
+			if s == '-h' or s == '--help':
 				print estr
 				sys.exit()
 			elif s == '-v':
@@ -99,7 +94,7 @@ def main(argv):
 	if pkg is None:
 		print 'Package name required'
 		sys.exit(2)
-	[printChangelog(p,n,v) for p in pkg]
+	[printChangelog(p,nlines,v) for p in pkg]
 
 if __name__ == "__main__":
 	main(sys.argv[1:])

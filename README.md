@@ -4,7 +4,9 @@ View Arch linux change logs parsed from the official git repository (https://git
 #Usage
 pacl [-v] [\<number of entries\>] <pkgname>
 
-Supports piping, e.g.,
+The -v flag adds update description, which often includes more details.
+
+Also supports piping, e.g.,
 
 pacman -Ssq htop | pacl
 

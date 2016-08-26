@@ -16,7 +16,7 @@ def printChangelog( pkg, nlines=-1, v=False ):
 		ref.close()
 	except HTTPError:
 		print 'Error: Package "' + pkg + '" not found.'
-		sys.exit(1)
+		return
 	except Exception as e:
 		print e
 		sys.exit(1)

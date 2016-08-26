@@ -1,13 +1,28 @@
 #!/usr/bin/python
 import sys
+from subprocess import check_output
 
 def printChangelog( pkg, nlines=-1, v=False ):
 	from lxml import html
 	from urllib2 import urlopen,HTTPError
 
-	url = 'https://git.archlinux.org/svntogit/packages.git/log/trunk?h=packages/' + pkg + "&showmsg=1"
+	# Elementary sanitation.
+	pkg = pkg.replace(';','').replace('&','').replace('>','').replace('<','').replace('\n','').replace('|','').replace('$','').replace('`','')
+
+	url = 'https://git.archlinux.org/svntogit/packages.git/log/trunk?h=packages/'
 	desc = []	
 	hop=3
+	com=False
+	
+	try:
+		pacom='pacman -Ss ^' + pkg +'$'
+		c=check_output(pacom.split())
+		if c[0:9]=='community':
+			url = 'https://git.archlinux.org/svntogit/community.git/log/trunk?h=packages/'
+			com=True
+	except Exception as e:
+		None
+	url+= pkg + "&showmsg=1"
 	
 	try:
 		ref = urlopen(url)
@@ -15,8 +30,19 @@ def printChangelog( pkg, nlines=-1, v=False ):
 		cod = ref.code
 		ref.close()
 	except HTTPError:
-		print 'Error: Package "' + pkg + '" not found.'
-		return
+		url = 'https://git.archlinux.org/svntogit/community.git/log/trunk?h=packages/' + pkg + "&showmsg=1"
+		if com:
+			print 'Error: Package "' + pkg + '" not found.'
+			return
+		else:
+			try :
+				ref = urlopen(url)
+				page = ref.read()
+				cod = ref.code
+				ref.close()			
+			except HTTPError:
+				print 'Error: Package "' + pkg + '" not found.'
+				return
 	except Exception as e:
 		print e
 		sys.exit(1)
